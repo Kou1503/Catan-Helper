@@ -20,6 +20,10 @@ manifest.json
 src/
   background.js
   backgroundWorker.js
+  backgroundMain.js
+  content/
+    contentScript.js
+    overlayRuntime.js
   content/
     contentScript.js
     pageHook.js
@@ -64,6 +68,11 @@ If Chrome keeps showing old errors like `Unexpected identifier 'diagnostics'` or
 1. Go to `chrome://extensions`.
 2. Remove **Catan Helper Overlay**.
 3. Click **Load unpacked** and select this repo root again.
+4. Confirm the version is `0.1.2` in the extension card details.
+
+This forces Chrome to register the latest worker entrypoint (`src/backgroundMain.js`) instead of stale cached worker code.
+
+After reinstalling the extension, close any already-open Colonist tabs and open a fresh tab before testing. This avoids running a page that still has old injected content scripts in memory.
 4. Confirm the version is `0.1.1` in the extension card details.
 
 This forces Chrome to register the latest worker entrypoint (`src/backgroundWorker.js`) instead of stale cached worker code.
