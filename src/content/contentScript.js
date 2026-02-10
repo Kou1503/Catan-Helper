@@ -52,6 +52,7 @@ function createOverlayRoot() {
   const root = document.createElement("aside");
   root.id = "catan-helper-overlay";
   root.innerHTML = `<div id="catan-helper-overlay-header"><button id="catan-helper-drag-handle" aria-label="Drag overlay">⠿</button><h2>Catan Helper</h2></div><p>Waiting for game events...</p>`;
+  root.innerHTML = "<h2>Catan Helper</h2><p>Waiting for game events...</p>";
   document.documentElement.appendChild(root);
   return root;
 }
@@ -126,6 +127,8 @@ function renderOverlay(root, data) {
       <button id="catan-helper-drag-handle" aria-label="Drag overlay">⠿</button>
       <h2>Catan Helper</h2>
     </div>
+  root.innerHTML = `
+    <h2>Catan Helper</h2>
     <div class="section"><h3>Phase</h3><p>${escapeHtml(data.phase)} (setup turn ${data.setupTurn})</p></div>
     <div class="section"><h3>Top Setup Vertices</h3><ol>${topVertices || "<li>No setup recommendations</li>"}</ol></div>
     <div class="section">
