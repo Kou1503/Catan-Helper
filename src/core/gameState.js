@@ -21,6 +21,8 @@ export class GameState {
       for (const tile of snapshot.tiles) {
         this.board.tiles.set(tile.id, {
           id: tile.id,
+          resource: normalizeResource(tile.resource),
+          token: Number(tile.token) || 0,
           resource: tile.resource,
           token: tile.token,
           vertices: tile.vertices || []
@@ -35,6 +37,12 @@ export class GameState {
           id: vertex.id,
           adjacentTiles: vertex.adjacentTiles || [],
           neighbors: vertex.neighbors || [],
+          occupant: normalizeOccupant(vertex.occupant)
+        });
+      }
+    }
+
+    this.recomputeIncomeRates();
           occupant: vertex.occupant || null
         });
       }
@@ -73,6 +81,9 @@ export class GameState {
     };
 
     const player = this.ensurePlayer(playerId);
+    if (!player.settlements.includes(vertexId)) {
+      player.settlements.push(vertexId);
+    }
     player.settlements.push(vertexId);
 
     if (this.isSetupPhase()) {
@@ -98,6 +109,9 @@ export class GameState {
     };
 
     const player = this.ensurePlayer(playerId);
+    if (!player.cities.includes(vertexId)) {
+      player.cities.push(vertexId);
+    }
     player.cities.push(vertexId);
     player.settlements = player.settlements.filter((id) => id !== vertexId);
 
@@ -107,6 +121,8 @@ export class GameState {
   recomputeIncomeRates() {
     for (const player of this.players.values()) {
       player.incomeRate = Object.fromEntries(RESOURCE_TYPES.map((type) => [type, 0]));
+      player.settlements = [];
+      player.cities = [];
     }
 
     for (const vertex of this.board.vertices.values()) {
@@ -114,6 +130,12 @@ export class GameState {
       const { playerId, building } = vertex.occupant;
       const player = this.ensurePlayer(playerId);
       const multiplier = building === "city" ? 2 : 1;
+
+      if (building === "city") {
+        player.cities.push(vertex.id);
+      } else {
+        player.settlements.push(vertex.id);
+      }
 
       for (const tileId of vertex.adjacentTiles) {
         const tile = this.board.tiles.get(tileId);
@@ -164,4 +186,26 @@ function tokenToWeight(token) {
   };
 
   return values[token] || 0;
+}
+
+function normalizeResource(resource) {
+  const normalized = String(resource || "").toLowerCase();
+  if (normalized.includes("wood") || normalized.includes("lumber")) return "lumber";
+  if (normalized.includes("brick")) return "brick";
+  if (normalized.includes("ore")) return "ore";
+  if (normalized.includes("grain") || normalized.includes("wheat")) return "grain";
+  if (normalized.includes("wool") || normalized.includes("sheep")) return "wool";
+  return "desert";
+}
+
+function normalizeOccupant(occupant) {
+  if (!occupant || typeof occupant !== "object") return null;
+
+  const playerId = occupant.playerId ?? occupant.ownerId ?? occupant.player ?? occupant.id;
+  if (playerId == null) return null;
+
+  const kind = String(occupant.building ?? occupant.type ?? occupant.kind ?? "settlement").toLowerCase();
+  const building = kind.includes("city") ? "city" : "settlement";
+
+  return { playerId, building };
 }

@@ -6,6 +6,7 @@ export class RobberEngine {
 
     const tileScores = Array.from(state.board.tiles.values())
       .filter((tile) => tile.resource && tile.resource !== "desert" && tile.id !== state.robberTileId)
+      .filter((tile) => hasOpponentVictim(tile, state, perspectivePlayerId))
       .map((tile) => {
         const productionBlocked = blockedProduction(tile, state, perspectivePlayerId);
         const threatBlocked = blockedThreat(tile, opponents);
@@ -28,6 +29,13 @@ export class RobberEngine {
       rankings: tileScores.slice(0, 10)
     };
   }
+}
+
+function hasOpponentVictim(tile, state, perspectivePlayerId) {
+  return (tile.vertices || []).some((vertexId) => {
+    const occupant = state.board.vertices.get(vertexId)?.occupant;
+    return occupant && occupant.playerId !== perspectivePlayerId;
+  });
 }
 
 function blockedProduction(tile, state, perspectivePlayerId) {
