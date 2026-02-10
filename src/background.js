@@ -86,6 +86,16 @@ function buildOverlayPayload() {
     players,
     robberTileId: gameState.robberTileId,
     lastDiceRoll: gameState.lastDiceRoll,
+    diagnostics: buildDiagnostics(players)
+  };
+}
+
+function buildDiagnostics(players) {
+  return {
+    ...diagnostics,
+    trackedPlayers: players.length,
+    trackedTiles: gameState.board.tiles.size,
+    trackedVertices: gameState.board.vertices.size
     diagnostics: {
       ...diagnostics,
       trackedPlayers: players.length,

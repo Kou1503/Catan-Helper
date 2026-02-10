@@ -33,6 +33,12 @@
     }
 
     if (payload instanceof ArrayBuffer) {
+      publish(decodeUtf8(payload));
+      return;
+    }
+
+    if (ArrayBuffer.isView(payload)) {
+      publish(decodeUtf8(payload.buffer));
       publish(new TextDecoder().decode(payload));
       return;
     }
@@ -46,6 +52,20 @@
         });
       return;
     }
+
+    // Ignore unknown payload types to avoid flooding runtime with non-JSON payloads.
+  }
+
+  function decodeUtf8(buffer) {
+    try {
+      return new TextDecoder().decode(buffer);
+    } catch {
+      return "";
+    }
+  }
+
+  function publish(data) {
+    if (typeof data !== "string" || data.length === 0) return;
 
     // Best-effort fallback for structured messages.
     publish(payload);

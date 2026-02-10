@@ -19,6 +19,10 @@ export function parseInboundMessage(rawData) {
 
 function normalizePayload(rawData) {
   if (rawData == null) return null;
+  if (typeof rawData === "object") {
+    if (Array.isArray(rawData) || isPlainObject(rawData)) return rawData;
+    return null;
+  }
   if (typeof rawData === "object") return rawData;
   if (typeof rawData !== "string") return null;
 
@@ -293,6 +297,7 @@ function dedupeEvents(events) {
   const out = [];
 
   for (const event of events) {
+    const key = `${event.type}:${safeStringify(event.payload)}`;
     const key = `${event.type}:${JSON.stringify(event.payload)}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -300,4 +305,18 @@ function dedupeEvents(events) {
   }
 
   return out;
+}
+
+function isPlainObject(value) {
+  if (!value || typeof value !== "object") return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function safeStringify(value) {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "[unserializable]";
+  }
 }
