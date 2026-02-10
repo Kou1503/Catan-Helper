@@ -2,6 +2,9 @@
   injectPageHook();
   injectOverlayStyles();
 
+  onDocumentReady(() => {
+    const overlay = createOverlayRoot();
+    installDragBehavior(overlay);
   const overlay = createOverlayRoot();
   installDragBehavior(overlay);
 
@@ -27,6 +30,22 @@
     renderOverlay(overlay, message.payload);
   });
 
+    chrome.runtime.sendMessage({ type: "REQUEST_STATE" }, (payload) => {
+      if (!payload) return;
+      renderOverlay(overlay, payload);
+    });
+  });
+})();
+
+function onDocumentReady(callback) {
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", callback, { once: true });
+    return;
+  }
+
+  callback();
+}
+
   chrome.runtime.sendMessage({ type: "REQUEST_STATE" }, (payload) => {
     if (!payload) return;
     renderOverlay(overlay, payload);
@@ -45,6 +64,7 @@ function injectOverlayStyles() {
   const link = document.createElement("link");
   link.rel = "stylesheet";
   link.href = chrome.runtime.getURL("src/ui/overlay.css");
+  (document.head || document.documentElement).appendChild(link);
   document.documentElement.appendChild(link);
 }
 

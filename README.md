@@ -19,6 +19,7 @@ A Manifest V3 Chrome extension scaffold for a **read-only strategic analytics ov
 manifest.json
 src/
   background.js
+  backgroundWorker.js
   content/
     contentScript.js
     pageHook.js
@@ -54,3 +55,15 @@ src/
 3. Add confidence scoring around hidden information inference.
 4. Add persisted game logs for post-game analysis.
 5. Add unit tests for engines and parser mappings.
+
+
+## If you still see stale service-worker syntax errors
+
+If Chrome keeps showing old errors like `Unexpected identifier 'diagnostics'` or `Unexpected identifier 'Helper'` after a reload, do a hard refresh of the extension install:
+
+1. Go to `chrome://extensions`.
+2. Remove **Catan Helper Overlay**.
+3. Click **Load unpacked** and select this repo root again.
+4. Confirm the version is `0.1.1` in the extension card details.
+
+This forces Chrome to register the latest worker entrypoint (`src/backgroundWorker.js`) instead of stale cached worker code.
