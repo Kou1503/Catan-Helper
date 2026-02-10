@@ -23,6 +23,8 @@ export class GameState {
           id: tile.id,
           resource: normalizeResource(tile.resource),
           token: Number(tile.token) || 0,
+          resource: tile.resource,
+          token: tile.token,
           vertices: tile.vertices || []
         });
       }
@@ -41,6 +43,10 @@ export class GameState {
     }
 
     this.recomputeIncomeRates();
+          occupant: vertex.occupant || null
+        });
+      }
+    }
   }
 
   ensurePlayer(playerId, playerName = playerId) {
@@ -78,6 +84,7 @@ export class GameState {
     if (!player.settlements.includes(vertexId)) {
       player.settlements.push(vertexId);
     }
+    player.settlements.push(vertexId);
 
     if (this.isSetupPhase()) {
       this.setupTurn += 1;
@@ -105,6 +112,7 @@ export class GameState {
     if (!player.cities.includes(vertexId)) {
       player.cities.push(vertexId);
     }
+    player.cities.push(vertexId);
     player.settlements = player.settlements.filter((id) => id !== vertexId);
 
     this.recomputeIncomeRates();

@@ -52,6 +52,7 @@ function createOverlayRoot() {
   const root = document.createElement("aside");
   root.id = "catan-helper-overlay";
   root.innerHTML = `<div id="catan-helper-overlay-header"><button id="catan-helper-drag-handle" aria-label="Drag overlay">⠿</button><h2>Catan Helper</h2></div><p>Waiting for game events...</p>`;
+  root.innerHTML = "<h2>Catan Helper</h2><p>Waiting for game events...</p>";
   document.documentElement.appendChild(root);
   return root;
 }
@@ -118,12 +119,16 @@ function renderOverlay(root, data) {
     })
     .join("");
 
+  const diagnostics = data.diagnostics || {};
+  const eventStatus = diagnostics.inboundMessages > 0 ? "Receiving game traffic" : "No game traffic yet";
 
   root.innerHTML = `
     <div id="catan-helper-overlay-header">
       <button id="catan-helper-drag-handle" aria-label="Drag overlay">⠿</button>
       <h2>Catan Helper</h2>
     </div>
+  root.innerHTML = `
+    <h2>Catan Helper</h2>
     <div class="section"><h3>Phase</h3><p>${escapeHtml(data.phase)} (setup turn ${data.setupTurn})</p></div>
     <div class="section"><h3>Top Setup Vertices</h3><ol>${topVertices || "<li>No setup recommendations</li>"}</ol></div>
     <div class="section">
@@ -136,6 +141,12 @@ function renderOverlay(root, data) {
       <p>${robber ? `Tile ${robber.tileId} (${robber.resource} ${robber.token}) score ${robber.score.toFixed(2)}` : "No robber target"}</p>
     </div>
     <div class="section"><h3>Player Economy</h3><ul>${players || "<li>No players tracked yet.</li>"}</ul></div>
+    <div class="section">
+      <h3>Diagnostics</h3>
+      <p>${escapeHtml(eventStatus)} • messages: ${diagnostics.inboundMessages || 0} • parsed events: ${diagnostics.parsedEvents || 0}</p>
+      <p>tiles: ${diagnostics.trackedTiles || 0} • vertices: ${diagnostics.trackedVertices || 0} • players: ${diagnostics.trackedPlayers || 0}</p>
+      <p>${escapeHtml(diagnostics.lastError ? `last error: ${diagnostics.lastError}` : "last error: none")}</p>
+    </div>
   `;
 }
 
