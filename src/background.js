@@ -9,6 +9,18 @@ const placementEngine = new PlacementEngine();
 const robberEngine = new RobberEngine();
 const resourceTracker = new ResourceTracker();
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "COLONIST_SOCKET_MESSAGE") {
+    let events = [];
+
+    try {
+      events = parseInboundMessage(message.payload);
+      for (const event of events) {
+        resourceTracker.applyEvent(event, gameState);
+      }
+    } catch (error) {
+      sendResponse({ ok: false, eventsProcessed: 0, error: String(error?.message || error) });
+      return true;
 const diagnostics = {
   inboundMessages: 0,
   parsedEvents: 0,
