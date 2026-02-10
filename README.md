@@ -23,6 +23,7 @@ src/
   content/
     contentScript.js
     overlayRuntime.js
+    runtimeCore.js
     pageHook.js
   core/
     constants.js
@@ -65,7 +66,7 @@ If Chrome keeps showing old errors like `Unexpected identifier 'diagnostics'` or
 1. Go to `chrome://extensions`.
 2. Remove **Catan Helper Overlay**.
 3. Click **Load unpacked** and select this repo root again.
-4. Confirm the version is `0.1.3` in the extension card details.
+4. Confirm the version is `0.1.4` in the extension card details.
 
 This forces Chrome to register the latest worker entrypoint (`src/backgroundMain.js`) instead of stale cached worker code.
 
