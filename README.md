@@ -11,6 +11,7 @@ A Manifest V3 Chrome extension scaffold for a **read-only strategic analytics ov
 - **Resource I/O tracker:** consumes normalized events for dice rolls, trades, builds, dev cards, robber movement, and steals.
 - **In-page overlay:** shows top setup picks, best pair, road direction, robber target, and player build capability estimates.
 - **Draggable UI:** drag the overlay by its handle and keep it out of the way during gameplay.
+- **Draggable UI + diagnostics:** drag the overlay by its handle and inspect inbound message/event counters for parser health.
 
 ## Folder layout
 

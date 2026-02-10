@@ -2,11 +2,13 @@
   "manifest_version": 3,
   "name": "Catan Helper Overlay",
   "version": "0.1.1",
+  "version": "0.1.0",
   "description": "Read-only Colonist.io strategic analytics overlay.",
   "permissions": ["storage"],
   "host_permissions": ["https://colonist.io/*"],
   "background": {
     "service_worker": "src/backgroundWorker.js",
+    "service_worker": "src/background.js",
     "type": "module"
   },
   "content_scripts": [
@@ -14,6 +16,7 @@
       "matches": ["https://colonist.io/*"],
       "js": ["src/content/contentScript.js"],
       "run_at": "document_idle"
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
