@@ -36,6 +36,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       sendResponse({ ok: false, eventsProcessed: 0, error: diagnostics.lastError });
     }
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "COLONIST_SOCKET_MESSAGE") {
+    const events = parseInboundMessage(message.payload);
+    for (const event of events) {
+      resourceTracker.applyEvent(event, gameState);
+    }
+
+    broadcastEvaluation(sender?.tab?.id);
+    sendResponse({ ok: true, eventsProcessed: events.length });
     return true;
   }
 
@@ -87,6 +96,13 @@ function buildDiagnostics(players) {
     trackedPlayers: players.length,
     trackedTiles: gameState.board.tiles.size,
     trackedVertices: gameState.board.vertices.size
+    diagnostics: {
+      ...diagnostics,
+      trackedPlayers: players.length,
+      trackedTiles: gameState.board.tiles.size,
+      trackedVertices: gameState.board.vertices.size
+    }
+    lastDiceRoll: gameState.lastDiceRoll
   };
 }
 

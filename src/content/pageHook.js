@@ -10,6 +10,14 @@
 
       socket.addEventListener("message", (event) => {
         forwardSocketPayload(event.data);
+        window.postMessage(
+          {
+            source: "CATAN_HELPER_PAGE",
+            type: "COLONIST_SOCKET_MESSAGE",
+            payload: event.data
+          },
+          "*"
+        );
       });
 
       return socket;
@@ -31,6 +39,7 @@
 
     if (ArrayBuffer.isView(payload)) {
       publish(decodeUtf8(payload.buffer));
+      publish(new TextDecoder().decode(payload));
       return;
     }
 
@@ -58,6 +67,11 @@
   function publish(data) {
     if (typeof data !== "string" || data.length === 0) return;
 
+    // Best-effort fallback for structured messages.
+    publish(payload);
+  }
+
+  function publish(data) {
     window.postMessage(
       {
         source: "CATAN_HELPER_PAGE",
@@ -67,4 +81,30 @@
       "*"
     );
   }
+  // Preserve native constants and behavior (CONNECTING/OPEN/etc.) by using a Proxy
+  // and replacing only the constructor reference.
+  window.WebSocket = WrappedWebSocket;
+  function WrappedWebSocket(url, protocols) {
+    const socket = protocols ? new NativeWebSocket(url, protocols) : new NativeWebSocket(url);
+
+    socket.addEventListener("message", (event) => {
+      window.postMessage(
+        {
+          source: "CATAN_HELPER_PAGE",
+          type: "COLONIST_SOCKET_MESSAGE",
+          payload: event.data
+        },
+        "*"
+      );
+    });
+
+    return socket;
+  }
+
+  WrappedWebSocket.prototype = NativeWebSocket.prototype;
+  Object.defineProperty(window, "WebSocket", {
+    value: WrappedWebSocket,
+    configurable: true,
+    writable: false
+  });
 })();
