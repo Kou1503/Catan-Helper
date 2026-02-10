@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Catan Helper Overlay",
+  "version": "0.1.2",
+  "description": "Read-only Colonist.io strategic analytics overlay.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://colonist.io/*"
+  ],
+  "background": {
+    "service_worker": "src/backgroundMain.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://colonist.io/*"
+      ],
+      "js": [
+        "src/content/overlayRuntime.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/content/pageHook.js",
+        "src/ui/overlay.css"
+      ],
+      "matches": [
+        "https://colonist.io/*"
+      ]
+    }
+  ],
+  "action": {
+    "default_title": "Catan Helper Overlay"
+  }
+}
