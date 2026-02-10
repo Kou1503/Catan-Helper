@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Catan Helper Overlay",
+  "version": "0.1.4",
   "version": "0.1.2",
   "description": "Read-only Colonist.io strategic analytics overlay.",
   "permissions": [

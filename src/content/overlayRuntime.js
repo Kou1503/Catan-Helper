@@ -1,3 +1,4 @@
+import "./runtimeCore.js";
 (function bootstrap() {
   if (window.__CATAN_HELPER_OVERLAY_ACTIVE__) {
     return;

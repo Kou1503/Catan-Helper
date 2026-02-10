@@ -1,3 +1,4 @@
+import "./backgroundMain.js";
 import { GameState } from "./core/gameState.js";
 import { PlacementEngine } from "./core/placementEngine.js";
 import { RobberEngine } from "./core/robberEngine.js";
