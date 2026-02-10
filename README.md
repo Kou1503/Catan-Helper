@@ -68,3 +68,5 @@ If Chrome keeps showing old errors like `Unexpected identifier 'diagnostics'` or
 4. Confirm the version is `0.1.2` in the extension card details.
 
 This forces Chrome to register the latest worker entrypoint (`src/backgroundMain.js`) instead of stale cached worker code.
+
+After reinstalling the extension, close any already-open Colonist tabs and open a fresh tab before testing. This avoids running a page that still has old injected content scripts in memory.
