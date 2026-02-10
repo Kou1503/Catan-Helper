@@ -1,0 +1,104 @@
+(function bootstrap() {
+  injectPageHook();
+  injectOverlayStyles();
+
+  const overlay = createOverlayRoot();
+
+  window.addEventListener("message", (event) => {
+    if (event.source !== window) return;
+    if (event.data?.source !== "CATAN_HELPER_PAGE") return;
+
+    chrome.runtime.sendMessage(
+      {
+        type: event.data.type,
+        payload: event.data.payload
+      },
+      () => {
+        if (chrome.runtime.lastError) {
+          console.debug("Catan Helper sendMessage warning:", chrome.runtime.lastError.message);
+        }
+      }
+    );
+  });
+
+  chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type !== "OVERLAY_DATA") return;
+    renderOverlay(overlay, message.payload);
+  });
+
+  chrome.runtime.sendMessage({ type: "REQUEST_STATE" }, (payload) => {
+    if (!payload) return;
+    renderOverlay(overlay, payload);
+  });
+})();
+
+function injectPageHook() {
+  const script = document.createElement("script");
+  script.src = chrome.runtime.getURL("src/content/pageHook.js");
+  script.async = false;
+  (document.head || document.documentElement).appendChild(script);
+  script.onload = () => script.remove();
+}
+
+function injectOverlayStyles() {
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = chrome.runtime.getURL("src/ui/overlay.css");
+  document.documentElement.appendChild(link);
+}
+
+function createOverlayRoot() {
+  const root = document.createElement("aside");
+  root.id = "catan-helper-overlay";
+  root.innerHTML = "<h2>Catan Helper</h2><p>Waiting for game events...</p>";
+  document.documentElement.appendChild(root);
+  return root;
+}
+
+function renderOverlay(root, data) {
+  const topVertices = (data.placement?.rankedVertices || [])
+    .slice(0, 5)
+    .map((v) => `<li>#${v.vertexId}: <strong>${v.score.toFixed(2)}</strong> <span>${escapeHtml(v.detail)}</span></li>`)
+    .join("");
+
+  const topPair = data.placement?.rankedPairs?.[0];
+  const robber = data.robber?.bestTile;
+  const players = (data.players || [])
+    .map((p) => {
+      const options = Object.entries(p.buildOptions || {})
+        .filter(([, can]) => can)
+        .map(([name]) => name)
+        .join(", ");
+      return `<li><strong>${escapeHtml(p.name || p.id)}</strong> - cards: ${resourceTotal(p.resourceEstimates)} - can build: ${escapeHtml(options || "nothing")}</li>`;
+    })
+    .join("");
+
+  root.innerHTML = `
+    <h2>Catan Helper</h2>
+    <div class="section"><h3>Phase</h3><p>${escapeHtml(data.phase)} (setup turn ${data.setupTurn})</p></div>
+    <div class="section"><h3>Top Setup Vertices</h3><ol>${topVertices || "<li>No setup recommendations</li>"}</ol></div>
+    <div class="section">
+      <h3>Best Pair + Road</h3>
+      <p>${topPair ? `#${topPair.first} + #${topPair.second} (score ${topPair.score.toFixed(2)})` : "N/A"}</p>
+      <p>${topPair?.suggestedRoad ? escapeHtml(`${topPair.suggestedRoad.from} -> ${topPair.suggestedRoad.to}`) : "No road suggestion"}</p>
+    </div>
+    <div class="section">
+      <h3>Robber Recommendation</h3>
+      <p>${robber ? `Tile ${robber.tileId} (${robber.resource} ${robber.token}) score ${robber.score.toFixed(2)}` : "No robber target"}</p>
+    </div>
+    <div class="section"><h3>Player Economy</h3><ul>${players || "<li>No players tracked yet.</li>"}</ul></div>
+  `;
+}
+
+function resourceTotal(resources = {}) {
+  return Object.values(resources).reduce((acc, value) => acc + value, 0);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
